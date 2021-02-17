@@ -4,22 +4,19 @@ namespace Warehouse\V1\Rest\Customers;
 
 use Laminas\ApiTools\ApiProblem\ApiProblem;
 use Laminas\ApiTools\Rest\AbstractResourceListener;
+use Laminas\Db\Adapter\Adapter;
 
 class CustomersResource extends AbstractResourceListener
 {
-    private $customers = [
-        1 => [
-            "id" => 1,
-            "name" => "Peter",
-            "title" => "IT Boss",
-        ],
-        2 => [
-            "id" => 2,
-            "name" => "Slavey",
-            "title" => "Student"
-        ]
-    ];
+    /**
+     * @var Adapter
+     */
+    private $dbAdapter;
 
+    public function __construct(Adapter $dbAdapter)
+    {
+        $this->dbAdapter = $dbAdapter;
+    }
 
     /**
      * Create a resource
@@ -77,7 +74,15 @@ class CustomersResource extends AbstractResourceListener
      */
     public function fetchAll($params = [])
     {
-        return $this->customers;
+        $rows = $this->dbAdapter->query("SELECT * FROM ZENDPHP74.SP_CUST", Adapter::QUERY_MODE_EXECUTE); // TODO: Move to a Model/Business Object
+
+        $data = [];
+        foreach ($rows as $row) {
+            // TODO: add only allowed columns to be visible.
+            $data[$row['CUST_ID']] = $row;
+        }
+
+        return $data;
     }
 
     /**

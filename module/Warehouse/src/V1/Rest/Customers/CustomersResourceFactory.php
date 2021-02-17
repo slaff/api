@@ -5,6 +5,8 @@ class CustomersResourceFactory
 {
     public function __invoke($services)
     {
-        return new CustomersResource();
+        $db2Adapter = $services->get('db2Adapter');
+
+        return new CustomersResource($db2Adapter);
     }
 }
