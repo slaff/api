@@ -5,17 +5,18 @@ namespace Warehouse\V1\Rest\Customers;
 use Laminas\ApiTools\ApiProblem\ApiProblem;
 use Laminas\ApiTools\Rest\AbstractResourceListener;
 use Laminas\Db\Adapter\Adapter;
+use Laminas\Db\TableGateway\TableGateway;
 
 class CustomersResource extends AbstractResourceListener
 {
     /**
-     * @var Adapter
+     * @var TableGateway
      */
-    private $dbAdapter;
+    private $table;
 
-    public function __construct(Adapter $dbAdapter)
+    public function __construct(TableGateway $table)
     {
-        $this->dbAdapter = $dbAdapter;
+        $this->table = $table;
     }
 
     /**
@@ -59,11 +60,8 @@ class CustomersResource extends AbstractResourceListener
      */
     public function fetch($id)
     {
-        if(isset($this->customers[$id])) {
-            return $this->customers[$id];
-        }
-
-        return [];
+        $row = $this->table->select(["CUST_ID" => $id]);
+        return $row->current();
     }
 
     /**
@@ -74,12 +72,13 @@ class CustomersResource extends AbstractResourceListener
      */
     public function fetchAll($params = [])
     {
-        $rows = $this->dbAdapter->query("SELECT * FROM ZENDPHP74.SP_CUST", Adapter::QUERY_MODE_EXECUTE); // TODO: Move to a Model/Business Object
+        $rows = $this->table->select((array)$params);
 
         $data = [];
         foreach ($rows as $row) {
             // TODO: add only allowed columns to be visible.
             $data[$row['CUST_ID']] = $row;
+            // TODO: Task - iterate over the $row fields and trim the value of every element
         }
 
         return $data;
